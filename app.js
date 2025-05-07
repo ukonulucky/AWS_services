@@ -5,7 +5,7 @@ import dotenv from "dotenv"
 import cors from "cors"
 import multer from "multer"
 import sharp from "sharp"
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import crypto, { randomBytes } from "crypto"
@@ -92,6 +92,8 @@ res.status(200).json({
   }
 })
 
+
+// get a single image
 app.post("/api/get", async(req, res) => { 
     const { imageName } = req.body
     const getObjectParams = {
@@ -106,6 +108,23 @@ app.post("/api/get", async(req, res) => {
         imageUrl: url
     })
 })
+
+// delete a single image
+
+app.delete("/api/deleteImage", async(req, res) => { 
+    const { imageName } = req.body
+    const deleteObjectParams = {
+        Bucket: AWS_BUCKET_NAME,
+        Key: imageName
+    }
+    const command = new DeleteObjectCommand(deleteObjectParams);
+  const result=  await s3.send(command)
+    return res.status(200).json({ 
+        message: "Image deleted successfully",
+        result
+    })
+})
+
 
 
 app.use((req, res, next) => {
